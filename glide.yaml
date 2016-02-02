@@ -1,0 +1,4 @@
+package: github.com/melkorm/gron
+import:
+- package: github.com/Sirupsen/logrus
+  version: ^v0.8.7
