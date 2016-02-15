@@ -1,12 +1,10 @@
-{
-    "jobs": [
-        {
-            "name": "every 1 sec",
-            "command": "sh",
-            "args": ["-c", "sleep $(jot -r 1 1 20)"],
-            "runners": 9,
-            "timeout": 5,
-            "runsEvery": "1s"
-        }
-    ]
-}
+[
+    {
+        "name": "Task D",
+        "command": "sleep",
+        "args": ["60"],
+        "runsEvery": "1s",
+        "AllowedInstances": 1,
+        "TimeoutDuration": "50s"
+    }
+]

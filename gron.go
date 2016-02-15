@@ -3,50 +3,25 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"log"
 	"os"
-	"os/exec"
-	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/melkorm/gron/config"
+	"github.com/melkorm/gron/rest"
+	"github.com/melkorm/gron/runner"
 )
 
-func init() {
-	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
-}
-
-// FinishedJob type describing finished job
-type FinishedJob struct {
-	Job    config.Job
-	Output string
-}
-
-func runJob(job config.Job, finishedJobs chan FinishedJob) {
-	ticker := time.NewTicker(job.Interval())
-	go func() {
-		for range ticker.C {
-			if job.CanRun() {
-				job.IncrementInstances()
-				go func() {
-					ouput, err := exec.Command(job.Command, job.Args...).Output()
-					if err != nil {
-						log.Fatalln("Command error", os.Stderr, err)
-					}
-
-					finishedJobs <- FinishedJob{job, string(ouput) + time.Now().String()}
-					job.DecrementInstances()
-				}()
-			} else {
-				log.Debug("Job " + job.Name + " exceeded runners " + string(job.Instances))
-			}
-		}
-	}()
-}
-
 func main() {
-	path := flag.String("path", "", "Path, absolute or relative to config file")
+	f, err := os.OpenFile("logs", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	log.SetOutput(os.Stdout)
+	// log := log.New(os.Stdout, "new", 1)
+
+	path := flag.String("path", "", "Path, absolute or relative to  file")
 	flag.Parse()
 
 	data, err := ioutil.ReadFile(*path)
@@ -55,20 +30,13 @@ func main() {
 		log.Fatalln("%s", err)
 		panic(err)
 	}
-	test, err := config.Parse(data)
+	tasks, err := config.Parse(data)
 
 	if err != nil {
-		log.Fatalln("Cant parse config %s", err)
+		log.Fatalf("Can't parse %s", err)
 		panic(err)
 	}
 
-	finishedJobs := make(chan FinishedJob)
-
-	for _, job := range test.Jobs {
-		go runJob(job, finishedJobs)
-	}
-
-	for finishedJob := range finishedJobs {
-		log.Debug("Finished", finishedJob.Job.Name, "with output", finishedJob.Output)
-	}
+	runner.Run(tasks)
+	rest.Serve(tasks)
 }
