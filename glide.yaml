@@ -1,0 +1,3 @@
+package: github.com/melkorm/gron
+import:
+- package: github.com/twinj/uuid

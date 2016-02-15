@@ -1,0 +1,6 @@
+hash: 1f12c005b03a989c38e401ee9ca9c8d0772323f8d53489740b420f9ef6ef330c
+updated: 2016-02-15T12:37:59.302354322+01:00
+imports:
+- name: github.com/twinj/uuid
+  version: 89173bcdda19db0eb88aef1e1cb1cb2505561d31
+devImports: []
