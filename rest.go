@@ -1,14 +1,12 @@
-package rest
+package gron
 
 import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/melkorm/gron/runner"
 )
 
-var tasks []*runner.Task
+var tasks []*Task
 
 func showTasks(w http.ResponseWriter, r *http.Request) {
 	for _, task := range tasks {
@@ -31,7 +29,7 @@ func killProcess(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Serve(t []*runner.Task) {
+func Serve(t []*Task) {
 	tasks = t
 	http.HandleFunc("/tasks/", showTasks)
 	http.HandleFunc("/killProcess/", killProcess)
