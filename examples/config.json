@@ -1,0 +1,26 @@
+[
+    {
+        "Name": "test 1",
+        "Cmd": "sleep",
+        "Args": ["1"],
+        "MaxInstances": 1,
+        "Timeout": "2s",
+        "RunsEvery": "3s"
+    },
+    {
+        "Name": "test 2",
+        "Cmd": "sleep",
+        "Args": ["3"],
+        "MaxInstances": 1,
+        "Timeout": "2s",
+        "RunsEvery": "1s"
+    },
+    {
+        "Name": "test 3",
+        "Cmd": "sleep",
+        "Args": ["2"],
+        "MaxInstances": 1,
+        "Timeout": "3s",
+        "RunsEvery": "1s"
+    }
+]
