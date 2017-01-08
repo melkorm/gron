@@ -34,7 +34,8 @@ func main() {
 		panic(err)
 	}
 	var wg sync.WaitGroup
-	spinner := gron.NewSpinner(tasks, &wg, log.New(os.Stdout, "spinner: ", log.Lshortfile))
+
+	spinner := gron.NewSpinner(tasks)
 
 	spinner.Spin()
 	go Serve(tasks)
