@@ -2,20 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"sync"
 
-	gron "github.com/melkorm/gron/lib"
+	"github.com/melkorm/gron"
 )
 
 func main() {
-	f, err := os.OpenFile("logs", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
 	log.SetOutput(os.Stdout)
 	path := flag.String("path", "", "Path, absolute or relative to  file")
 	flag.Parse()
@@ -26,6 +22,8 @@ func main() {
 		log.Fatalln("%s", err)
 		panic(err)
 	}
+	defer c.Close()
+
 	jsonConf := &gron.JSONConf{}
 	tasks, err := jsonConf.Parse(c)
 
@@ -34,11 +32,25 @@ func main() {
 		panic(err)
 	}
 	var wg sync.WaitGroup
-
 	spinner := gron.NewSpinner(tasks)
-
-	spinner.Spin()
-	go Serve(tasks)
+	go gron.Serve(tasks)
+	go spinner.Spin()
 	wg.Add(1)
+	go signalHandler(wg)
 	wg.Wait()
+}
+
+func signalHandler(group sync.WaitGroup) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	// Block until a signal is received.
+	s := <-c
+	fmt.Println("Got signal:", s)
+	if s == os.Interrupt {
+		fmt.Println("Attempting gracefull shut down ...")
+		os.Exit(0)
+	}
+	signal.Stop(c)
+	group.Done()
 }

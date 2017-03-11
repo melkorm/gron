@@ -102,5 +102,13 @@
         "MaxInstances": 1,
         "Timeout": "2s",
         "RunsEvery": "3s"
+    },
+    {
+        "Name": "test 12222",
+        "Cmd": "echo",
+        "Args": ["wooo hooo"],
+        "MaxInstances": 5,
+        "Timeout": "2s",
+        "RunsEvery": "1s"
     }
 ]
