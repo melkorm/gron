@@ -1,12 +1,12 @@
 package gron
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"syscall"
-	"encoding/json"
 )
 
 var jobs []*Job
@@ -21,16 +21,14 @@ func killProcess(w http.ResponseWriter, r *http.Request) {
 	pID := r.URL.Path[len("/killProcess/"):]
 	for _, job := range jobs {
 		for _, p := range job.GetProcesses() {
-			if p.GetID() == pID {
+			if p.Id == pID {
 				p.Signal(syscall.SIGKILL)
-				fmt.Fprintf(w, p.String())
-				job.RemoveProcess(p)
 			}
 		}
 	}
 }
 
-// Serve Start the http server
+// Serve Started the http server
 func Serve(t []*Job) {
 	jobs = t
 	http.HandleFunc("/jobs/", showTasks)

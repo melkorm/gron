@@ -6,19 +6,21 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"fmt"
+	"encoding/json"
 )
 
 // Job is a command to run
 type Job struct {
-	sync.Mutex
 	Name         string
 	Cmd          string
+	WorkDir      string
 	Args         []string
 	MaxInstances int
-	Timeout      jobDuration
-	RunsEvery    jobDuration
-	Processes    []*Process
+	Timeout      JobDuration `json:",string"`
+	RunsEvery    JobDuration `json:",string"`
+
+	procMutex sync.Mutex
+	Processes []*Process `json:",omitempty"`
 }
 
 func (j *Job) GetProcesses() []*Process {
@@ -26,8 +28,8 @@ func (j *Job) GetProcesses() []*Process {
 }
 
 func (j *Job) AddProcess(p *Process) error {
-	j.Lock()
-	defer j.Unlock()
+	j.procMutex.Lock()
+	defer j.procMutex.Unlock()
 	if len(j.Processes) > j.MaxInstances {
 		log.Println("Max instances")
 		return errors.New("Max instances")
@@ -37,24 +39,22 @@ func (j *Job) AddProcess(p *Process) error {
 }
 
 func (j *Job) RemoveProcess(p *Process) error {
-	j.Lock()
-	defer j.Unlock()
+	j.procMutex.Lock()
+	defer j.procMutex.Unlock()
 	for k, v := range j.Processes {
 		if v == p {
-			fmt.Println("pre removed", len(j.Processes))
 			j.Processes = append(j.Processes[:k], j.Processes[k+1:]...)
-			fmt.Println("post removed", len(j.Processes))
 			break
 		}
 	}
 	return nil
 }
 
-type jobDuration struct {
+type JobDuration struct {
 	time.Duration
 }
 
-func (jd *jobDuration) UnmarshalJSON(buf []byte) error {
+func (jd *JobDuration) UnmarshalJSON(buf []byte) error {
 	td, err := time.ParseDuration(strings.Trim(string(buf), `"`))
 	if err != nil {
 		return err
@@ -62,4 +62,8 @@ func (jd *jobDuration) UnmarshalJSON(buf []byte) error {
 
 	jd.Duration = td
 	return nil
+}
+
+func (j *JobDuration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(j.Duration.String())
 }

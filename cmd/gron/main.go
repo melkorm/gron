@@ -49,8 +49,8 @@ func signalHandler(group sync.WaitGroup) {
 	fmt.Println("Got signal:", s)
 	if s == os.Interrupt {
 		fmt.Println("Attempting gracefull shut down ...")
+		defer group.Done()
 		os.Exit(0)
 	}
 	signal.Stop(c)
-	group.Done()
 }
