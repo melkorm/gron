@@ -2,7 +2,7 @@
   {
     "Name": "test12121212 1",
     "Cmd": "sleep",
-    "WorkingDir": "/",
+    "WorkDir": "/",
     "Args": [
       "1"
     ],
